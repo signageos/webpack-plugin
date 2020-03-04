@@ -96,7 +96,7 @@ publish:npm-public:
     - export NPM_REGISTRY_URL=https://registry.npmjs.org/
     - export NPM_REGISTRY_HOST=registry.npmjs.org
     - export NPM_AUTH_TOKEN=$PUBLIC_NPM_AUTH_TOKEN
-    - tools/prepare-npm-public.sh
+    - tools/prepare-npm-public.js
     - npm publish --ignore-scripts --tag $TAG
 
 release:tag:

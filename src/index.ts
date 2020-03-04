@@ -62,6 +62,8 @@ export default class Plugin {
 		});
 	}
 }
+module.exports = Plugin;
+module.exports.default = Plugin;
 
 interface IEmulator {
 	notifyDone(stats: webpack.Stats): void;

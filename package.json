@@ -3,6 +3,13 @@
   "version": "0.0.2",
   "description": "Webpack Plugin for emulating sOS JS API in browser",
   "main": "dist/index.js",
+  "files": [
+    ".env",
+    "dist",
+    "README.md",
+    "package.json",
+    "package-lock.json"
+  ],
   "scripts": {
     "build": "tsc",
     "lint": "tslint --config node_modules/@signageos/codestyle/tslint.json \"{src,tests}/**/*.{ts,tsx}\"",

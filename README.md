@@ -4,8 +4,9 @@ signageOS webpack plugin which allows to debug signageOS application in browser 
 
 ## Installation
 ```bash
-npm install @signageos/webpack-plugin --save-dev
+npm install @signageos/webpack-plugin @signageos/front-display --save-dev
 ```
+> `@signageos/front-display` is peer dependency of webpack plugin.
 
 ## Usage
 ```js

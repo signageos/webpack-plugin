@@ -44,6 +44,9 @@
     "mime": "2.4.4",
     "serve-static": "1.14.1"
   },
+  "peerDependencies": {
+    "@signageos/front-display": ">=7.1.1"
+  },
   "devDependencies": {
     "@signageos/codestyle": "0.0.15",
     "@types/chalk": "2.2.0",

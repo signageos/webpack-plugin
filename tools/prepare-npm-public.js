@@ -12,10 +12,6 @@ fs.writeFileSync(
 				registry: "https://registry.npmjs.org/",
 				access: "public",
 			},
-			files: [
-				'tools',
-				'package.json',
-			],
 		},
 		undefined,
 		2,

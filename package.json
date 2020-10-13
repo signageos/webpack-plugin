@@ -1,6 +1,6 @@
 {
   "name": "@signageos/webpack-plugin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Webpack Plugin for emulating sOS JS API in browser",
   "main": "dist/index.js",
   "files": [

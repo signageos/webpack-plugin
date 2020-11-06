@@ -9,10 +9,10 @@ import * as fs from 'fs-extra';
 import * as serveStatic from 'serve-static';
 import * as chalk from 'chalk';
 import Debug from 'debug';
-import {  loadConfig } from './RunControl/runControlHelper';
+import {  loadConfig } from '@signageos/sdk/dist/SosHelper/sosControlHelper';
 import {
 	reloadDevice,
-} from './helper';
+} from './ConnectControl/helper';
 const createDomain = require('webpack-dev-server/lib/utils/createDomain');
 const debug = Debug('@signageos/webpack-plugin:index');
 

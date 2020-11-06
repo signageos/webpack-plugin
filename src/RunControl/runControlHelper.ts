@@ -4,11 +4,20 @@ import * as path from 'path';
 import * as os from 'os';
 
 const RUN_CONTROL_FILENAME = '.sosrc';
+const CONNECT_FILENAME = '.connceted';
 
 export interface IConfig {
 	identification?: string;
 	apiSecurityToken?: string;
 	defaultOrganizationUid?: string;
+	defaultDeviceUid?: string;
+	defaultDeviceDuId?: string;
+	oauthClientId?: string;
+	oauthClientSecret?: string;
+}
+
+export interface IConnect {
+	deviceUid?: string;
 }
 
 export async function saveConfig(config: IConfig) {
@@ -41,4 +50,19 @@ export function getConfigFilePath() {
 	const homeDirectoryPath = os.homedir();
 	const runControlFilePath = path.join(homeDirectoryPath, RUN_CONTROL_FILENAME);
 	return runControlFilePath;
+}
+
+export async function loadConnectFile(): Promise<IConnect> {
+	const connectFilePath = await getConnectFilePath();
+	if (!await fs.pathExists(connectFilePath)) {
+		return {};
+	}
+	const connectFileContent = await fs.readFile(connectFilePath);
+	return ini.decode(connectFileContent.toString()) as IConnect;
+}
+
+export async function getConnectFilePath() {
+	const tmpdirPath = os.tmpdir();
+	const connectFilePath = path.join(tmpdirPath, CONNECT_FILENAME);
+	return connectFilePath;
 }

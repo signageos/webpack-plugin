@@ -9,7 +9,10 @@ import * as fs from 'fs-extra';
 import * as serveStatic from 'serve-static';
 import * as chalk from 'chalk';
 import Debug from 'debug';
-import { loadConfig } from './RunControl/runControlHelper';
+import {  loadConfig } from './RunControl/runControlHelper';
+import {
+	reloadDevice,
+} from './helper';
 const createDomain = require('webpack-dev-server/lib/utils/createDomain');
 const debug = Debug('@signageos/webpack-plugin:index');
 
@@ -51,6 +54,7 @@ export default class Plugin {
 		compiler.plugin('done', (stats: webpack.Stats) => {
 			if (emulator) {
 				emulator.notifyDone(stats);
+				reloadDevice();
 			}
 		});
 
@@ -119,6 +123,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 
 		const defaultUrl = createDomain(options, server);
 		const appletDirectoryPath = '/applet';
+
 		const appletBinaryFileUrl = `${defaultUrl}${appletDirectoryPath}/index.html`;
 
 		app.use(appletDirectoryPath, (req: express.Request, res: express.Response, next: () => void) => {

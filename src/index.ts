@@ -5,16 +5,20 @@ import * as http from 'http';
 import * as url from 'url';
 import * as cors from 'cors';
 import * as mime from 'mime';
-import * as fs from 'fs-extra';
+import * as fsExtra from 'fs-extra';
+import * as nativeFs from "fs";
 import * as serveStatic from 'serve-static';
 import * as chalk from 'chalk';
 import Debug from 'debug';
 import {  loadConfig } from '@signageos/sdk/dist/SosHelper/sosControlHelper';
 import {
-	reloadDevice,
+	createAllAppletZips,
+	reloadConnectedDevices,
 } from './ConnectControl/helper';
 const createDomain = require('webpack-dev-server/lib/utils/createDomain');
 const debug = Debug('@signageos/webpack-plugin:index');
+
+type FileSystem = typeof nativeFs;
 
 export interface IWebpackOptions {
 	https?: boolean; // default false
@@ -22,6 +26,20 @@ export interface IWebpackOptions {
 	public?: string; // default undefined
 	useLocalIp?: boolean; // default true
 	host?: string; // default undefined
+}
+
+function getCompilationFileSystem(possibleFs: webpack.OutputFileSystem) {
+	let fileSystem = possibleFs as unknown as FileSystem;
+	if (!('createReadStream' in fileSystem)) {
+		// TODO uncomment this warning when webpack-dev-server is fixed for device connected builds (currently webpack --watch is supported)
+		/*console.warn(
+			'The environment is running in not standard mode. '
+			+ 'Try to use `npm start` or `webpack-dev-server` instead. '
+			+ 'The real FS will be used as failover.',
+		);*/
+		fileSystem = nativeFs;
+	}
+	return fileSystem;
 }
 
 export default class Plugin {
@@ -51,10 +69,11 @@ export default class Plugin {
 			}
 		});
 
-		compiler.plugin('done', (stats: webpack.Stats) => {
+		compiler.plugin('done', async (stats: webpack.Stats) => {
 			if (emulator) {
 				emulator.notifyDone(stats);
-				reloadDevice();
+				await createAllAppletZips(getCompilationFileSystem(stats.compilation.compiler.outputFileSystem));
+				reloadConnectedDevices();
 			}
 		});
 
@@ -82,7 +101,7 @@ type WebpackAssets = {
 };
 
 type WebpackCompilation = webpack.compilation.Compilation & {
-	compiler: webpack.Compiler & { outputFileSystem: typeof fs };
+	compiler: webpack.Compiler & { outputFileSystem: typeof fsExtra };
 };
 
 async function createEmulator(options: IWebpackOptions): Promise<IEmulator | undefined> {
@@ -111,7 +130,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			res.send(
 				`<script>window.__SOS_BUNDLED_APPLET = ${JSON.stringify(envVars)}</script>`
 				+ `<script>window.__SOS_AUTO_VERIFICATION = ${JSON.stringify(envVars)}</script>`
-				+ fs.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString(),
+				+ fsExtra.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString(),
 			);
 		});
 		app.use(serveStatic(frontDisplayDistPath));
@@ -130,6 +149,15 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			const fileUrl = url.parse(req.url);
 			const relativeFilePath = fileUrl.pathname ? fileUrl.pathname.substr(1) : '';
 
+			if (!currentCompilation) {
+				res.status(502).send(
+					'<span style="background-color: darkred;">Webpack is starting up. Please wait a second & try it again.</span>',
+				);
+				return;
+			}
+
+			const fileSystem = getCompilationFileSystem(currentCompilation.compiler.outputFileSystem);
+
 			if (relativeFilePath === 'index.html') {
 				if (typeof lastCompilationAssets[relativeFilePath] === 'undefined') {
 					res.status(404).send();
@@ -144,14 +172,14 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 				const compiledFilePath = lastCompilationAssets[relativeFilePath].existsAt;
 				const contentType = mime.getType(relativeFilePath) || 'application/octet-stream';
 				res.setHeader('Content-Type', contentType);
-				const readStream = currentCompilation.compiler.outputFileSystem.createReadStream(compiledFilePath);
+				const readStream = fileSystem.createReadStream(compiledFilePath);
 				readStream.pipe(res);
 			} else {
 				next();
 			}
 		});
 
-		const packageConfig = JSON.parse(fs.readFileSync(path.join(projectPath, 'package.json')).toString());
+		const packageConfig = JSON.parse(fsExtra.readFileSync(path.join(projectPath, 'package.json')).toString());
 
 		const sosGlobalConfig = await loadConfig();
 		const organizationUid = sosGlobalConfig.defaultOrganizationUid;

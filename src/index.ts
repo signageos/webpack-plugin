@@ -104,6 +104,17 @@ type WebpackCompilation = webpack.compilation.Compilation & {
 	compiler: webpack.Compiler & { outputFileSystem: typeof fsExtra };
 };
 
+const APPLET_DIRECTORY_PATH = '/applet';
+
+type IEnvVars = {
+	frontAppletVersion: string;
+	frontAppletBinaryFile: string;
+	version: string;
+	binaryFilePath: string;
+	organizationUid: string;
+	checksum: string;
+};
+
 async function createEmulator(options: IWebpackOptions): Promise<IEmulator | undefined> {
 	try {
 		const projectPath = process.cwd();
@@ -112,9 +123,25 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		const frontDisplayPath = path.dirname(require.resolve('@signageos/front-display/package.json', { paths: [projectPath]}));
 		const frontDisplayDistPath = path.join(frontDisplayPath, 'dist');
 
+		const packageConfig = JSON.parse(fsExtra.readFileSync(path.join(projectPath, 'package.json')).toString());
+
+		const sosGlobalConfig = await loadConfig();
+		const organizationUid = sosGlobalConfig.defaultOrganizationUid;
+
+		if (!organizationUid) {
+			throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);
+		}
+
 		let currentCompilation: WebpackCompilation;
 		let lastCompilationAssets: WebpackAssets = {};
-		let envVars = {};
+		let envVars: IEnvVars = {
+			version: packageConfig.version,
+			organizationUid,
+			binaryFilePath: `${APPLET_DIRECTORY_PATH}/index.html`,
+			checksum: '',
+			frontAppletVersion: '', // has bundled front applet
+			frontAppletBinaryFile: '', // has bundled front applet
+		};
 
 		const app = express();
 
@@ -128,8 +155,16 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		});
 		app.get('/', (_req: express.Request, res: express.Response) => {
 			res.send(
-				`<script>window.__SOS_BUNDLED_APPLET = ${JSON.stringify(envVars)}</script>`
-				+ `<script>window.__SOS_AUTO_VERIFICATION = ${JSON.stringify(envVars)}</script>`
+				`<script>
+					window.__SOS_BUNDLED_APPLET = {};
+					window.__SOS_BUNDLED_APPLET.binaryFile = location.origin + ${JSON.stringify(envVars.binaryFilePath)};
+					window.__SOS_BUNDLED_APPLET.version = ${JSON.stringify(envVars.version)};
+					window.__SOS_BUNDLED_APPLET.checksum = ${JSON.stringify(envVars.checksum)};
+					window.__SOS_BUNDLED_APPLET.frontAppletVersion = ${JSON.stringify(envVars.frontAppletVersion)};
+					window.__SOS_BUNDLED_APPLET.frontAppletBinaryFile = ${JSON.stringify(envVars.frontAppletBinaryFile)};
+					window.__SOS_AUTO_VERIFICATION = {};
+					window.__SOS_AUTO_VERIFICATION.organizationUid = ${JSON.stringify(envVars.organizationUid)};
+				</script>`
 				+ fsExtra.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString(),
 			);
 		});
@@ -140,12 +175,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			console.log(`Emulator is running at ${chalk.blue(chalk.bold(createDomain(options, server)))}`);
 		});
 
-		const defaultUrl = createDomain(options, server);
-		const appletDirectoryPath = '/applet';
-
-		const appletBinaryFileUrl = `${defaultUrl}${appletDirectoryPath}/index.html`;
-
-		app.use(appletDirectoryPath, (req: express.Request, res: express.Response, next: () => void) => {
+		app.use(APPLET_DIRECTORY_PATH, (req: express.Request, res: express.Response, next: () => void) => {
 			const fileUrl = url.parse(req.url);
 			const relativeFilePath = fileUrl.pathname ? fileUrl.pathname.substr(1) : '';
 
@@ -179,32 +209,12 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			}
 		});
 
-		const packageConfig = JSON.parse(fsExtra.readFileSync(path.join(projectPath, 'package.json')).toString());
-
-		const sosGlobalConfig = await loadConfig();
-		const organizationUid = sosGlobalConfig.defaultOrganizationUid;
-
-		if (!organizationUid) {
-			throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);
-		}
-
-		envVars = {
-			version: packageConfig.version,
-			binaryFile: appletBinaryFileUrl,
-			frontAppletVersion: '', // has bundled front applet
-			frontAppletBinaryFile: '', // has bundled front applet
-			organizationUid,
-		};
-
 		return {
 			notifyDone(stats: webpack.Stats) {
 				try {
 					console.log('SOS Applet compilation done');
 
-					envVars = {
-						...envVars,
-						checksum: stats.compilation.hash,
-					};
+					envVars.checksum = stats.compilation.hash!;
 					debug('process.env', envVars);
 
 					if (typeof stats.compilation.assets['index.html'] === 'undefined') {

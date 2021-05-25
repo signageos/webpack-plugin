@@ -123,7 +123,10 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		const frontDisplayPath = path.dirname(require.resolve('@signageos/front-display/package.json', { paths: [projectPath]}));
 		const frontDisplayDistPath = path.join(frontDisplayPath, 'dist');
 
-		const packageConfig = JSON.parse(fsExtra.readFileSync(path.join(projectPath, 'package.json')).toString());
+		const packagePath = path.join(projectPath, 'package.json');
+		const packageConfig = fsExtra.pathExistsSync(packagePath)
+			? JSON.parse(fsExtra.readFileSync(packagePath).toString())
+			: { version: '0.0.0' };
 
 		const sosGlobalConfig = await loadConfig();
 		const organizationUid = sosGlobalConfig.defaultOrganizationUid;

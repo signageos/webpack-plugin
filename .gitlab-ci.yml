@@ -47,7 +47,7 @@ test:lint:
   except:
     - tags
   script:
-    - if [ `find test* -type f -print0 | xargs -0 grep "\.only" | wc -l` -gt 0 ]; then echo "You forgot the .only in tests" && exit 1; fi
+    - if [ `find test -name '*\.ts' -type f -print0 | xargs -0 grep "\.only" | wc -l` -gt 0 ]; then echo "You forgot the .only in tests" && exit 1; fi
     - npm run lint
 
 test:changelog:

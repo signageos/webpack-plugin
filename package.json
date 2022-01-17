@@ -50,7 +50,7 @@
     "webpack-dev-server": "3.11.0"
   },
   "peerDependencies": {
-    "@signageos/front-display": ">=7.1.1",
+    "@signageos/front-display": ">=7.1.1 <=9.12.1",
     "webpack": "^4.46.0"
   },
   "devDependencies": {

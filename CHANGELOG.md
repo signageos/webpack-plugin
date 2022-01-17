@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Peer dependency for front-display is limited to version 9.12.1 (because of changed API)
+
 ## [0.1.1] - 2021-02-22
 ### Fixed
 - `localhost:8090` based development of applet works now

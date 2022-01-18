@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- Peer dependency for front-display is limited to version 9.12.1 (because of changed API)
+- Compatibility with peer dependency for front-display version 9.13.0+ (because of changed API)
 
 ## [0.1.1] - 2021-02-22
 ### Fixed

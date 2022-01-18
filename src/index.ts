@@ -109,6 +109,7 @@ const APPLET_DIRECTORY_PATH = '/applet';
 type IEnvVars = {
 	frontAppletVersion: string;
 	frontAppletBinaryFile: string;
+	uid: string;
 	version: string;
 	binaryFilePath: string;
 	organizationUid: string;
@@ -138,6 +139,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		let currentCompilation: WebpackCompilation;
 		let lastCompilationAssets: WebpackAssets = {};
 		let envVars: IEnvVars = {
+			uid: packageConfig.sos?.appletUid || '__default_timing__',
 			version: packageConfig.version,
 			organizationUid,
 			binaryFilePath: `${APPLET_DIRECTORY_PATH}/index.html`,
@@ -161,6 +163,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 				`<script>
 					window.__SOS_BUNDLED_APPLET = {};
 					window.__SOS_BUNDLED_APPLET.binaryFile = location.origin + ${JSON.stringify(envVars.binaryFilePath)};
+					window.__SOS_BUNDLED_APPLET.uid = ${JSON.stringify(envVars.uid)};
 					window.__SOS_BUNDLED_APPLET.version = ${JSON.stringify(envVars.version)};
 					window.__SOS_BUNDLED_APPLET.checksum = ${JSON.stringify(envVars.checksum)};
 					window.__SOS_BUNDLED_APPLET.frontAppletVersion = ${JSON.stringify(envVars.frontAppletVersion)};

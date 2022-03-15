@@ -36,6 +36,7 @@
   },
   "homepage": "https://github.com/signageos/webpack-plugin#readme",
   "dependencies": {
+    "@signageos/cli": "1.0.0",
     "@signageos/sdk": "1.7.1",
     "@types/archiver": "5.1.0",
     "archiver": "5.0.2",

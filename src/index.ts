@@ -15,7 +15,7 @@ import {
 	createAllAppletZips,
 	reloadConnectedDevices,
 } from './ConnectControl/helper';
-const createDomain = require('webpack-dev-server/lib/utils/createDomain');
+import { createDomain } from '@signageos/cli/dist/Emulator/createDomain';
 const debug = Debug('@signageos/webpack-plugin:index');
 
 type FileSystem = typeof nativeFs;

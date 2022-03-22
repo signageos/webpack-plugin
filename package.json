@@ -18,7 +18,7 @@
     "prepare": "npm run prebuild && npm run build",
     "test": "mocha",
     "watch": "tsc --watch",
-    "check": "depcheck --specials=tslint,webpack,mocha --parsers='*.ts:typescript,*.js:es6' --detectors='requireCallExpression,importDeclaration' --ignore-dirs='dist' --ignores='@types/*,@signageos/codestyle,mocha,depcheck,webpack'"
+    "check": "depcheck --specials=tslint,webpack,mocha --parsers='**/*.ts:typescript,**/*.js:es6' --detectors='requireCallExpression,importDeclaration' --ignore-dirs='dist' --ignores='@types/*,@signageos/codestyle,mocha,depcheck,webpack'"
   },
   "repository": {
     "type": "git",
@@ -48,8 +48,7 @@
     "fs-extra": "8.1.0",
     "lodash": "4.17.21",
     "mime": "2.4.4",
-    "serve-static": "1.14.1",
-    "webpack-dev-server": "4.7.4"
+    "serve-static": "1.14.1"
   },
   "peerDependencies": {
     "@signageos/front-display": ">=7.1.1",

@@ -18,7 +18,8 @@
     "prepare": "npm run prebuild && npm run build",
     "test": "mocha",
     "watch": "tsc --watch",
-    "check": "depcheck --specials=tslint,webpack,mocha --parsers='**/*.ts:typescript,**/*.js:es6' --detectors='requireCallExpression,importDeclaration' --ignore-dirs='dist' --ignores='@types/*,@signageos/codestyle,mocha,depcheck,webpack'"
+    "check": "npm run depcheck && npx --userconfig ./.npmrc @signageos/lib check-deps",
+    "depcheck": "depcheck --specials=tslint,webpack,mocha --parsers='**/*.ts:typescript,**/*.js:es6' --detectors='requireCallExpression,importDeclaration' --ignore-dirs='dist' --ignores='@types/*,@signageos/codestyle,mocha,depcheck,webpack'"
   },
   "repository": {
     "type": "git",

@@ -9,13 +9,15 @@ import * as fsExtra from 'fs-extra';
 import * as nativeFs from "fs";
 import * as serveStatic from 'serve-static';
 import * as chalk from 'chalk';
+import * as cliArgs from 'command-line-args';
 import Debug from 'debug';
-import {  loadConfig } from '@signageos/sdk/dist/SosHelper/sosControlHelper';
+import { getOrganizationUidOrDefaultOrSelect, NO_DEFAULT_ORGANIZATION_OPTION, ORGANIZATION_UID_OPTION } from '@signageos/cli/dist/Organization/organizationFacade';
 import {
 	createAllAppletZips,
 	reloadConnectedDevices,
 } from './ConnectControl/helper';
-const createDomain = require('webpack-dev-server/lib/utils/createDomain');
+import { createDomain } from '@signageos/cli/dist/Emulator/createDomain';
+import { CommandLineOptions } from '@signageos/cli/dist/Command/commandDefinition';
 const debug = Debug('@signageos/webpack-plugin:index');
 
 type FileSystem = typeof nativeFs;
@@ -129,8 +131,14 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			? JSON.parse(fsExtra.readFileSync(packagePath).toString())
 			: { version: '0.0.0' };
 
-		const sosGlobalConfig = await loadConfig();
-		const organizationUid = sosGlobalConfig.defaultOrganizationUid;
+		const currentOptions = cliArgs(
+			[
+				NO_DEFAULT_ORGANIZATION_OPTION,
+				ORGANIZATION_UID_OPTION,
+			],
+			{ partial: true },
+		) as CommandLineOptions<[typeof ORGANIZATION_UID_OPTION, typeof NO_DEFAULT_ORGANIZATION_OPTION]>;
+		const organizationUid = await getOrganizationUidOrDefaultOrSelect(currentOptions);
 
 		if (!organizationUid) {
 			throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);

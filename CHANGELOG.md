@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support for Webpack 5
+
 ## [0.2.0] - 2022-04-06
 ### Added
 - Ask for organization when default is not set yet and offer to save the default organization

@@ -11,7 +11,11 @@ import * as serveStatic from 'serve-static';
 import * as chalk from 'chalk';
 import * as cliArgs from 'command-line-args';
 import Debug from 'debug';
-import { getOrganizationUidOrDefaultOrSelect, NO_DEFAULT_ORGANIZATION_OPTION, ORGANIZATION_UID_OPTION } from '@signageos/cli/dist/Organization/organizationFacade';
+import {
+	getOrganizationUidOrDefaultOrSelect,
+	NO_DEFAULT_ORGANIZATION_OPTION,
+	ORGANIZATION_UID_OPTION,
+} from '@signageos/cli/dist/Organization/organizationFacade';
 import {
 	createAllAppletZips,
 	reloadConnectedDevices,
@@ -21,6 +25,7 @@ import { CommandLineOptions } from '@signageos/cli/dist/Command/commandDefinitio
 const debug = Debug('@signageos/webpack-plugin:index');
 
 type FileSystem = typeof nativeFs;
+type OutputFileSystem = webpack.Compiler['outputFileSystem'];
 
 export interface IWebpackOptions {
 	https?: boolean; // default false
@@ -30,7 +35,7 @@ export interface IWebpackOptions {
 	host?: string; // default undefined
 }
 
-function getCompilationFileSystem(possibleFs: webpack.OutputFileSystem) {
+function getCompilationFileSystem(possibleFs: OutputFileSystem) {
 	let fileSystem = possibleFs as unknown as FileSystem;
 	if (!('createReadStream' in fileSystem)) {
 		// TODO uncomment this warning when webpack-dev-server is fixed for device connected builds (currently webpack --watch is supported)
@@ -57,21 +62,26 @@ export default class Plugin {
 
 		let emulator: IEmulator | undefined;
 
-		compiler.plugin("watch-run", async (_compiler: webpack.Compiler, callback: () => void) => {
+		compiler.hooks.watchRun.tapPromise('SignageOSPlugin', async (_compiler: webpack.Compiler) => {
 			if (!emulator) {
 				emulator = await createEmulator(this.options);
 			}
-			callback();
 		});
 
-		compiler.plugin("watch-close", async () => {
+		compiler.hooks.watchClose.tap('SignageOSPlugin', async () => {
 			if (emulator) {
 				emulator.stop();
 				emulator = undefined;
 			}
 		});
 
-		compiler.plugin('done', async (stats: webpack.Stats) => {
+		compiler.hooks.assetEmitted.tap('SignageOSPlugin', async (filename, assetEmittedInfo) => {
+			if (emulator) {
+				emulator.notifyEmittedFile(filename, assetEmittedInfo);
+			}
+		});
+
+		compiler.hooks.done.tap('SignageOSPlugin', async (stats) => {
 			if (emulator) {
 				emulator.notifyDone(stats);
 				await createAllAppletZips(getCompilationFileSystem(stats.compilation.compiler.outputFileSystem));
@@ -91,19 +101,15 @@ module.exports = Plugin;
 module.exports.default = Plugin;
 
 interface IEmulator {
+	notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer): void;
 	notifyDone(stats: webpack.Stats): void;
 	stop(): void;
 }
 
 type WebpackAssets = {
 	[filePath: string]: {
-		existsAt: string;
-		source(): string;
+		source: Pick<webpack.Asset['source'], 'buffer' | 'source'>;
 	};
-};
-
-type WebpackCompilation = webpack.compilation.Compilation & {
-	compiler: webpack.Compiler & { outputFileSystem: typeof fsExtra };
 };
 
 const APPLET_DIRECTORY_PATH = '/applet';
@@ -144,7 +150,6 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);
 		}
 
-		let currentCompilation: WebpackCompilation;
 		let lastCompilationAssets: WebpackAssets = {};
 		let envVars: IEnvVars = {
 			uid: packageConfig.sos?.appletUid || '__default_timing__',
@@ -193,15 +198,6 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 			const fileUrl = url.parse(req.url);
 			const relativeFilePath = fileUrl.pathname ? fileUrl.pathname.substr(1) : '';
 
-			if (!currentCompilation) {
-				res.status(502).send(
-					'<span style="background-color: darkred;">Webpack is starting up. Please wait a second & try it again.</span>',
-				);
-				return;
-			}
-
-			const fileSystem = getCompilationFileSystem(currentCompilation.compiler.outputFileSystem);
-
 			if (relativeFilePath === 'index.html') {
 				if (typeof lastCompilationAssets[relativeFilePath] === 'undefined') {
 					res.status(404).send();
@@ -209,37 +205,47 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 					// Propagate Hot reload of whole emulator
 					const prependFileContent = '<script>window.onunload = function () { window.parent.location.reload(); }</script>';
 					res.setHeader('Content-Type', 'text/html');
-					res.send(prependFileContent + lastCompilationAssets[relativeFilePath].source());
+					res.send(prependFileContent + lastCompilationAssets[relativeFilePath].source.source());
 				}
 			} else
 			if (typeof lastCompilationAssets[relativeFilePath] !== 'undefined') {
-				const compiledFilePath = lastCompilationAssets[relativeFilePath].existsAt;
 				const contentType = mime.getType(relativeFilePath) || 'application/octet-stream';
 				res.setHeader('Content-Type', contentType);
-				const readStream = fileSystem.createReadStream(compiledFilePath);
-				readStream.pipe(res);
+				res.send(lastCompilationAssets[relativeFilePath].source.buffer());
 			} else {
 				next();
 			}
 		});
 
 		return {
-			notifyDone(stats: webpack.Stats) {
+			notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer) {
 				try {
 					console.log('SOS Applet compilation done');
 
-					envVars.checksum = stats.compilation.hash!;
-					debug('process.env', envVars);
-
-					if (typeof stats.compilation.assets['index.html'] === 'undefined') {
-						console.warn(`Applet has to have ${chalk.green('index.html')} in output files.`);
-						return;
+					if (assetEmittedInfo instanceof Buffer) {
+						// Back compatibility for Webpack 4 and less.
+						// It's returning Buffer of the emitted asset directly
+						lastCompilationAssets[filename] = {
+							source: {
+								source: () => assetEmittedInfo,
+								buffer: () => assetEmittedInfo,
+							},
+						};
+					} else {
+						lastCompilationAssets[filename] = assetEmittedInfo;
 					}
-					currentCompilation = stats.compilation as WebpackCompilation;
-					lastCompilationAssets = { ...lastCompilationAssets, ...stats.compilation.assets };
 				} catch (error) {
 					console.error(error);
 					process.exit(1);
+				}
+			},
+			notifyDone(stats: webpack.Stats) {
+				envVars.checksum = stats.compilation.hash!;
+				debug('process.env', envVars);
+
+				if (typeof stats.compilation.assets['index.html'] === 'undefined') {
+					console.warn(`Applet has to have ${chalk.green('index.html')} in output files.`);
+					return;
 				}
 			},
 			stop() {

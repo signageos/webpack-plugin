@@ -19,7 +19,7 @@ before_script:
   - npm config set unsafe-perm true
   - export VERSION=`cat ./VERSION`
   - export TAG=`cat ./PRERELEASE`
-  - npx --userconfig ./.npmrc @signageos/lib version-upgrade $VERSION
+  - npx --userconfig ./.npmrc @signageos/lib@latest version-upgrade $VERSION
   - mkdir -p dist
   - npm install --ignore-scripts
 

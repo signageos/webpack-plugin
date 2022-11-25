@@ -165,12 +165,6 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 
 		app.use(cors());
 
-		app.get('/display.appcache', (_req: express.Request, res: express.Response) => {
-			const currentDate = new Date();
-			res.header('Last-Modified', currentDate.toString());
-			res.header('Content-type', 'text/cache-manifest; charset=UTF-8');
-			res.send(`CACHE MANIFEST\n# v1 - ${currentDate.toISOString()}\n/tmp\nNETWORK:\n*\n`);
-		});
 		app.get('/', (_req: express.Request, res: express.Response) => {
 			res.send(
 				`<script>

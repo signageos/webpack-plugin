@@ -20,7 +20,6 @@ import {
 	createAllAppletZips,
 	reloadConnectedDevices,
 } from './ConnectControl/helper';
-import { createDomain } from '@signageos/cli/dist/Emulator/createDomain';
 import { CommandLineOptions } from '@signageos/cli/dist/Command/commandDefinition';
 const debug = Debug('@signageos/webpack-plugin:index');
 
@@ -185,7 +184,8 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 
 		const server = http.createServer(app);
 		server.listen(defaultPort, () => {
-			console.log(`Emulator is running at ${chalk.blue(chalk.bold(createDomain(options, server)))}`);
+			const emulatorUrl = `http://localhost:${defaultPort}`;
+			console.log(`Emulator is running at ${chalk.blue(chalk.bold(emulatorUrl))}`);
 		});
 
 		app.use(APPLET_DIRECTORY_PATH, (req: express.Request, res: express.Response, next: () => void) => {

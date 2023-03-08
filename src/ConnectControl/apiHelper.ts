@@ -1,3 +1,4 @@
+import { ApiVersions } from '@signageos/sdk/dist/RestApi/apiVersions';
 import IRestApiOptions from '@signageos/sdk/dist/RestApi/IOptions';
 import IRestApiAccountOptions from '@signageos/sdk/dist/RestApi/IOptions';
 import RestApi from "@signageos/sdk/dist/RestApi/RestApi";
@@ -9,13 +10,17 @@ export const API_URL = parameters.apiUrl;
 export async function createOrganizationRestApi(
 ) {
 	const config = await loadConfig();
+	const clientVersions = {
+		signageOS_WebpackPlugin: parameters.version,
+	};
 	const accountAuth: IRestApiOptions = {
 		url: API_URL,
 		auth: {
 			clientId: config.identification!,
 			secret: config.apiSecurityToken!,
 		},
-		version: 'v1' as 'v1',
+		version: ApiVersions.V1,
+		clientVersions,
 	};
 	const accountOptions: IRestApiAccountOptions = {
 		...accountAuth,
@@ -27,7 +32,8 @@ export async function createOrganizationRestApi(
 			clientId: organization.oauthClientId!,
 			secret: organization.oauthClientSecret!,
 		},
-		version: 'v1' as 'v1',
+		version: ApiVersions.V1,
+		clientVersions,
 	};
 	const organizationOptions: IRestApiAccountOptions = {
 		...organizationAuth,

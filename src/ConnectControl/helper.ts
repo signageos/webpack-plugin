@@ -30,7 +30,7 @@ export async function reloadConnectedDevices() {
 	}
 }
 
-export async function loadConnectedDeviceUids(): Promise<string[]> {
+async function loadConnectedDeviceUids(): Promise<string[]> {
 	if (!await fsExtra.pathExists(connectRuntimeDirPath)) {
 		return [];
 	}
@@ -54,7 +54,7 @@ export async function createAllAppletZips(outputFileSystem: FileSystem) {
 	return packageZipPaths;
 }
 
-export async function createAppletZip(deviceUid: string, outputFileSystem: FileSystem) {
+async function createAppletZip(deviceUid: string, outputFileSystem: FileSystem) {
 	const archive = archiver('zip');
 	const deviceConnectDir = path.join(connectRuntimeDirPath, deviceUid);
 	const packageZipPath = path.join(deviceConnectDir, "package.zip" + `${deviceUid}`);
@@ -85,7 +85,7 @@ export async function createAppletZip(deviceUid: string, outputFileSystem: FileS
 	return packageZipPath;
 }
 
-export async function getAllFiles(directory: string, outputFileSystem: FileSystem) {
+async function getAllFiles(directory: string, outputFileSystem: FileSystem) {
 	let fileList: string[] = [];
 
 	const files = outputFileSystem.readdirSync(directory);
@@ -103,7 +103,7 @@ export async function getAllFiles(directory: string, outputFileSystem: FileSyste
 	return fileList;
 }
 
-export function getAppletFileRelativePath(fileAbsolutePath: string, directoryAbsolutePath: string) {
+function getAppletFileRelativePath(fileAbsolutePath: string, directoryAbsolutePath: string) {
 	const directoryAbsolutePathNormalized = path.normalize(directoryAbsolutePath);
 	const fileAbsolutePathNormalized = path.normalize(fileAbsolutePath);
 

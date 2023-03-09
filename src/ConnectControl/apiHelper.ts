@@ -5,16 +5,15 @@ import RestApi from "@signageos/sdk/dist/RestApi/RestApi";
 import { loadConfig } from "@signageos/sdk/dist/SosHelper/sosControlHelper";
 import * as parameters from '../../config/parameters';
 
-export const API_URL = parameters.apiUrl;
-
 export async function createOrganizationRestApi(
+	organizationUid: string,
 ) {
 	const config = await loadConfig();
 	const clientVersions = {
 		signageOS_WebpackPlugin: parameters.version,
 	};
 	const accountAuth: IRestApiOptions = {
-		url: API_URL,
+		url: config.apiUrl,
 		auth: {
 			clientId: config.identification!,
 			secret: config.apiSecurityToken!,
@@ -25,9 +24,9 @@ export async function createOrganizationRestApi(
 	const accountOptions: IRestApiAccountOptions = {
 		...accountAuth,
 	};
-	const organization = await new RestApi(accountAuth, accountOptions).organization.get(config.defaultOrganizationUid!);
+	const organization = await new RestApi(accountAuth, accountOptions).organization.get(organizationUid!);
 	const organizationAuth: IRestApiOptions = {
-		url: API_URL,
+		url: config.apiUrl,
 		auth: {
 			clientId: organization.oauthClientId!,
 			secret: organization.oauthClientSecret!,

@@ -84,7 +84,7 @@ export default class Plugin {
 			if (emulator) {
 				emulator.notifyDone(stats);
 				await createAllAppletZips(getCompilationFileSystem(stats.compilation.compiler.outputFileSystem));
-				reloadConnectedDevices();
+				reloadConnectedDevices(emulator.getOrganizationUid());
 			}
 		});
 
@@ -100,6 +100,7 @@ module.exports = Plugin;
 module.exports.default = Plugin;
 
 interface IEmulator {
+	getOrganizationUid(): string;
 	notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer): void;
 	notifyDone(stats: webpack.Stats): void;
 	stop(): void;
@@ -212,6 +213,9 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		});
 
 		return {
+			getOrganizationUid() {
+				return organizationUid;
+			},
 			notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer) {
 				try {
 					console.log('SOS Applet compilation done');

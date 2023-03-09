@@ -13,10 +13,10 @@ const CONNECT_DIRECTORY = 'signageos';
 const connectRuntimeDirPath = path.join(os.tmpdir(), CONNECT_DIRECTORY);
 export const ignoredFiles: string[] = ["node_modules", "package-lock.json", "src", "public", ".gitignore", "README.md"];
 
-export async function reloadConnectedDevices() {
+export async function reloadConnectedDevices(organizationUid: string) {
 	const connectedDeviceUids = await loadConnectedDeviceUids();
 	if (connectedDeviceUids.length >= 1) {
-		const resApi = await createOrganizationRestApi();
+		const resApi = await createOrganizationRestApi(organizationUid);
 		await Promise.all(connectedDeviceUids.map(async (deviceUid: string) => {
 			try {
 				await resApi.device.powerAction.set(deviceUid, {

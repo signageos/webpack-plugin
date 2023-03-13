@@ -16,22 +16,40 @@ import {
 	NO_DEFAULT_ORGANIZATION_OPTION,
 	ORGANIZATION_UID_OPTION,
 } from '@signageos/cli/dist/Organization/organizationFacade';
-import {
-	createAllAppletZips,
-	reloadConnectedDevices,
-} from './ConnectControl/helper';
+import { createDevelopment } from '@signageos/sdk';
 import { CommandLineOptions } from '@signageos/cli/dist/Command/commandDefinition';
+import { AppletServer } from '@signageos/sdk/dist/Development/Applet/Serve/AppletServer';
+import { Development } from '@signageos/sdk/dist/Development/Development';
 const debug = Debug('@signageos/webpack-plugin:index');
 
 type FileSystem = typeof nativeFs;
 type OutputFileSystem = webpack.Compiler['outputFileSystem'];
 
+interface IAppletOptions {
+	appletUid: string;
+	appletVersion: string;
+}
+
 export interface IWebpackOptions {
-	https?: boolean; // default false
-	port?: number; // default 8090
-	public?: string; // default undefined
-	useLocalIp?: boolean; // default true
-	host?: string; // default undefined
+	/**
+	 * Emulator port.
+	 * @default 8090
+	 */
+	port?: number;
+	/**
+	 * @default http://localhost:8090
+	 */
+	publicUrl?: string;
+	/**
+	 * Custom applet server port.
+	 * @default 8091
+	 */
+	appletPort?: number;
+	/**
+	 * Public url of local machine applet server.
+	 * @default http://localhost:8091
+	 */
+	appletPublicUrl?: string;
 }
 
 function getCompilationFileSystem(possibleFs: OutputFileSystem) {
@@ -48,22 +66,56 @@ function getCompilationFileSystem(possibleFs: OutputFileSystem) {
 	return fileSystem;
 }
 
+const DEFAULT_WEBPACK_OPTIONS: IWebpackOptions = {
+	port: 8090,
+	appletPort: 8091,
+};
 export default class Plugin {
 
 	constructor(
 		private options: IWebpackOptions = {},
 	) {
-		this.options = { ...{ useLocalIp: true, port: 8090 }, ...this.options };
+		this.options = { ...DEFAULT_WEBPACK_OPTIONS, ...this.options };
 	}
 
 	public apply(compiler: webpack.Compiler) {
 		console.log('SOS Plugin started');
 
+		const appletPath = compiler.context;
+
+		let organizationUid: string | undefined;
 		let emulator: IEmulator | undefined;
+		let server: AppletServer | undefined;
+		let appletOptions: IAppletOptions | undefined;
+		let dev: Development | undefined;
 
 		compiler.hooks.watchRun.tapPromise('SignageOSPlugin', async (_compiler: webpack.Compiler) => {
+			if (!organizationUid) {
+				organizationUid = await getCurrentOrganizationUid();
+			}
+			if (!dev) {
+				dev = createDevelopment({
+					organizationUid,
+				});
+			}
+
+			if (!appletOptions) {
+				try {
+					appletOptions = await dev.applet.identification.getAppletUidAndVersion(appletPath);
+				} catch (e) {
+					console.warn(chalk.yellow('Applet is not uploaded yet. It cannot be developed on real device.'));
+				}
+			}
+
 			if (!emulator) {
-				emulator = await createEmulator(this.options);
+				emulator = await createEmulator(this.options, appletOptions, organizationUid, appletPath);
+			}
+			if (!server && appletOptions) {
+				server = await dev.applet.serve.serve({
+					...appletOptions,
+					port: this.options.appletPort,
+					publicUrl: this.options.appletPublicUrl,
+				});
 			}
 		});
 
@@ -71,6 +123,10 @@ export default class Plugin {
 			if (emulator) {
 				emulator.stop();
 				emulator = undefined;
+			}
+			if (server) {
+				server.stop();
+				server = undefined;
 			}
 		});
 
@@ -83,8 +139,15 @@ export default class Plugin {
 		compiler.hooks.done.tap('SignageOSPlugin', async (stats) => {
 			if (emulator) {
 				emulator.notifyDone(stats);
-				await createAllAppletZips(getCompilationFileSystem(stats.compilation.compiler.outputFileSystem));
-				reloadConnectedDevices(emulator.getOrganizationUid());
+			}
+			if (appletOptions) {
+				const virtualFs = getCompilationFileSystem(stats.compilation.compiler.outputFileSystem);
+				await dev?.applet.build.build({
+					appletPath,
+					...appletOptions,
+					fileSystems: [nativeFs, virtualFs],
+				});
+				await dev?.deviceConnect.reloadConnected();
 			}
 		});
 
@@ -93,6 +156,10 @@ export default class Plugin {
 				emulator.stop();
 				emulator = undefined;
 			}
+			if (server) {
+				server.stop();
+				server = undefined;
+			}
 		});
 	}
 }
@@ -100,7 +167,6 @@ module.exports = Plugin;
 module.exports.default = Plugin;
 
 interface IEmulator {
-	getOrganizationUid(): string;
 	notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer): void;
 	notifyDone(stats: webpack.Stats): void;
 	stop(): void;
@@ -124,36 +190,37 @@ type IEnvVars = {
 	checksum: string;
 };
 
-async function createEmulator(options: IWebpackOptions): Promise<IEmulator | undefined> {
+async function getCurrentOrganizationUid() {
+	const cliOptions = cliArgs(
+		[
+			NO_DEFAULT_ORGANIZATION_OPTION,
+			ORGANIZATION_UID_OPTION,
+		],
+		{ partial: true },
+	) as CommandLineOptions<[typeof ORGANIZATION_UID_OPTION, typeof NO_DEFAULT_ORGANIZATION_OPTION]>;
+	const organizationUid = await getOrganizationUidOrDefaultOrSelect(cliOptions);
+	if (!organizationUid) {
+		throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);
+	}
+
+	return organizationUid;
+}
+
+async function createEmulator(
+	options: IWebpackOptions,
+	appletOptions: IAppletOptions | undefined,
+	organizationUid: string,
+	appletPath: string,
+): Promise<IEmulator | undefined> {
 	try {
-		const projectPath = process.cwd();
-
 		const defaultPort = options.port;
-		const frontDisplayPath = path.dirname(require.resolve('@signageos/front-display/package.json', { paths: [projectPath]}));
+		const frontDisplayPath = path.dirname(require.resolve('@signageos/front-display/package.json', { paths: [appletPath]}));
 		const frontDisplayDistPath = path.join(frontDisplayPath, 'dist');
-
-		const packagePath = path.join(projectPath, 'package.json');
-		const packageConfig = fsExtra.pathExistsSync(packagePath)
-			? JSON.parse(fsExtra.readFileSync(packagePath).toString())
-			: { version: '0.0.0' };
-
-		const currentOptions = cliArgs(
-			[
-				NO_DEFAULT_ORGANIZATION_OPTION,
-				ORGANIZATION_UID_OPTION,
-			],
-			{ partial: true },
-		) as CommandLineOptions<[typeof ORGANIZATION_UID_OPTION, typeof NO_DEFAULT_ORGANIZATION_OPTION]>;
-		const organizationUid = await getOrganizationUidOrDefaultOrSelect(currentOptions);
-
-		if (!organizationUid) {
-			throw new Error(`No default organization selected. Use ${chalk.green('sos organization set-default')} first.`);
-		}
 
 		let lastCompilationAssets: WebpackAssets = {};
 		let envVars: IEnvVars = {
-			uid: packageConfig.sos?.appletUid || '__default_timing__',
-			version: packageConfig.version,
+			uid: appletOptions?.appletUid || '__default_timing__',
+			version: appletOptions?.appletVersion || '0.0.0',
 			organizationUid,
 			binaryFilePath: `${APPLET_DIRECTORY_PATH}/index.html`,
 			checksum: '',
@@ -185,7 +252,7 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 
 		const server = http.createServer(app);
 		server.listen(defaultPort, () => {
-			const emulatorUrl = `http://localhost:${defaultPort}`;
+			const emulatorUrl = options.publicUrl ?? `http://localhost:${defaultPort}`;
 			console.log(`Emulator is running at ${chalk.blue(chalk.bold(emulatorUrl))}`);
 		});
 
@@ -213,9 +280,6 @@ async function createEmulator(options: IWebpackOptions): Promise<IEmulator | und
 		});
 
 		return {
-			getOrganizationUid() {
-				return organizationUid;
-			},
 			notifyEmittedFile(filename: string, assetEmittedInfo: webpack.AssetEmittedInfo | Buffer) {
 				try {
 					console.log('SOS Applet compilation done');

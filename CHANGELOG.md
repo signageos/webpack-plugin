@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Report current version of plugin to server using `User-Agent` header
 - Support `SOS_PROFILE` environment variable to set the profile for the plugin
 
+### Changed
+- The options currently contains only required `port`, `publicUrl`, `appletPort` and `appletPublicUrl` options
+- The compatibility with `@signageos/cli` fewer than 1.1 for `sos device connect` is removed (Use 1.2+ instead)
+
+### Removed
+- The options `https`, `useLocalIp`, `host` are not accepted anymore
+
 ## [0.3.1] - 2022-11-25
 ### Fixed
 - Removed unused `display.appcache` file from Emulator (replaced with `serviceWorker.js`)

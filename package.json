@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "@signageos/front-display": ">=11.0.0",
-    "webpack": "^5.0.0"
+    "webpack": ">=4.0.0"
   },
   "devDependencies": {
     "@signageos/codestyle": "0.0.23",

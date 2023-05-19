@@ -1,0 +1,6 @@
+{
+	"expectRanges": {
+		"@signageos/sdk": "^",
+		"@signageos/cli": "^"
+	}
+}

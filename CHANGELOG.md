@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Upgrade SDK and CLI dependencies
+
 ## [1.0.2] - 2023-05-03
 ### Fixed
 - Prevent error "ERESOLVE" because of new peer dependency resolution in npm 7 (`--force`, or `--legacy-peer-deps` not required anymore)

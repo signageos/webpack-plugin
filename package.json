@@ -68,7 +68,7 @@
     "@types/mocha": "10.0.6",
     "@types/node": "16.18.3",
     "@types/serve-static": "1.15.5",
-    "depcheck": "1.4.3",
+    "depcheck": "1.4.7",
     "mocha": "10.2.0",
     "ts-node": "8.6.2",
     "tslint": "6.1.3",

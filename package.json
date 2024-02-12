@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@signageos/codestyle": "0.1.1",
-    "@signageos/front-display": "13.2.0",
+    "@signageos/front-display": "13.4.0",
     "@types/chalk": "2.2.0",
     "@types/command-line-args": "5.2.0",
     "@types/command-line-usage": "5.0.4",

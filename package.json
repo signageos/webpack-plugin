@@ -53,7 +53,7 @@
     "webpack": ">=4.0.0"
   },
   "devDependencies": {
-    "@signageos/codestyle": "0.1.1",
+    "@signageos/codestyle": "0.2.2",
     "@signageos/front-display": "13.6.1",
     "@types/chalk": "2.2.0",
     "@types/command-line-args": "5.2.0",

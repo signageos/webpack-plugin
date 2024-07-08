@@ -66,7 +66,7 @@
     "@types/ini": "4.1.1",
     "@types/mime": "2.0.1",
     "@types/mocha": "10.0.7",
-    "@types/node": "20.11.5",
+    "@types/node": "20.14.10",
     "@types/serve-static": "1.15.5",
     "depcheck": "1.4.7",
     "mocha": "10.5.0",

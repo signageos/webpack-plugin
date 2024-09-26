@@ -125,7 +125,7 @@ export default class Plugin {
 				emulator = undefined;
 			}
 			if (server) {
-				server.stop();
+				await server.stop();
 				server = undefined;
 			}
 		});

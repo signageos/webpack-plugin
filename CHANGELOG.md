@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Stopping Applet Server will not keep the process running in the background for a short time
+- Fixed missing production dependencies of package in published npm package on registry.npmjs.org
+
 ## [1.0.4] - 2024-09-26
 ### Fixed
 - Upgrade SDK and CLI dependencies

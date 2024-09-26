@@ -67,6 +67,7 @@
     "@types/mime": "2.0.1",
     "@types/mocha": "10.0.7",
     "@types/node": "20.11.5",
+    "@types/node-fetch": "2.6.11",
     "@types/serve-static": "1.15.5",
     "depcheck": "1.4.7",
     "mocha": "10.5.0",

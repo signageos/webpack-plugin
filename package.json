@@ -39,7 +39,7 @@
   "dependencies": {
     "@signageos/cli": "^1.6.0",
     "@signageos/sdk": "^1.24.0",
-    "chalk": "3.0.0",
+    "chalk": "5.4.0",
     "command-line-args": "5.2.1",
     "cors": "2.8.5",
     "debug": "4.3.4",

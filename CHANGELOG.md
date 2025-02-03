@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Insert script tag with applet info properly to prevent browser to parse html in quirks mode
+
 ## [1.0.5] - 2024-09-26
 ### Fixed
 - Stopping Applet Server will not keep the process running in the background for a short time

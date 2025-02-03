@@ -236,20 +236,22 @@ async function createEmulator(
 		app.use(cors());
 
 		app.get('/', (_req: express.Request, res: express.Response) => {
-			res.send(
-				`<script>
-					window.__SOS_BUNDLED_APPLET = {};
-					window.__SOS_BUNDLED_APPLET.binaryFile = location.origin + ${JSON.stringify(envVars.binaryFilePath)};
-					window.__SOS_BUNDLED_APPLET.uid = ${JSON.stringify(envVars.uid)};
-					window.__SOS_BUNDLED_APPLET.version = ${JSON.stringify(envVars.version)};
-					window.__SOS_BUNDLED_APPLET.checksum = ${JSON.stringify(envVars.checksum)};
-					window.__SOS_BUNDLED_APPLET.frontAppletVersion = ${JSON.stringify(envVars.frontAppletVersion)};
-					window.__SOS_BUNDLED_APPLET.frontAppletBinaryFile = ${JSON.stringify(envVars.frontAppletBinaryFile)};
-					window.__SOS_AUTO_VERIFICATION = {};
-					window.__SOS_AUTO_VERIFICATION.organizationUid = ${JSON.stringify(envVars.organizationUid)};
-				</script>`
-				+ fsExtra.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString(),
-			);
+			const page = fsExtra.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString();
+
+			const script = `
+<script>
+	window.__SOS_BUNDLED_APPLET = {};
+	window.__SOS_BUNDLED_APPLET.binaryFile = location.origin + ${JSON.stringify(envVars.binaryFilePath)};
+	window.__SOS_BUNDLED_APPLET.uid = ${JSON.stringify(envVars.uid)};
+	window.__SOS_BUNDLED_APPLET.version = ${JSON.stringify(envVars.version)};
+	window.__SOS_BUNDLED_APPLET.checksum = ${JSON.stringify(envVars.checksum)};
+	window.__SOS_BUNDLED_APPLET.frontAppletVersion = ${JSON.stringify(envVars.frontAppletVersion)};
+	window.__SOS_BUNDLED_APPLET.frontAppletBinaryFile = ${JSON.stringify(envVars.frontAppletBinaryFile)};
+	window.__SOS_AUTO_VERIFICATION = {};
+	window.__SOS_AUTO_VERIFICATION.organizationUid = ${JSON.stringify(envVars.organizationUid)};
+</script>`;
+
+			res.send(page.replace("</head>", `${script}</head>`));
 		});
 		app.use(serveStatic(frontDisplayDistPath));
 

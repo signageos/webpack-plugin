@@ -1,0 +1,7 @@
+{
+  "extends": "@signageos/codestyle/tslint.json",
+  "rules": {
+    "no-use-before-declare": false,
+    "no-shadowed-variable": false
+  }
+}

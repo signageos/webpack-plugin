@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "lint": "tslint --config node_modules/@signageos/codestyle/tslint.json \"{src,tests}/**/*.{ts,tsx}\"",
+    "lint": "tslint --config tslint.json \"{src,tests}/**/*.{ts,tsx}\"",
     "prebuild": "rm -rf dist/*",
     "prepare": "npm run prebuild && npm run build",
     "test": "mocha",

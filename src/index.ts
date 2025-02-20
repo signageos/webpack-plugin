@@ -270,9 +270,10 @@ async function createEmulator(
 					res.status(404).send();
 				} else {
 					// Propagate Hot reload of whole emulator
-					const prependFileContent = '<script>window.onunload = function () { window.parent.location.reload(); }</script>';
+					const prependFileContent = '<script>window.onbeforeunload = function () { window.parent.location.reload(); }</script>';
 					res.setHeader('Content-Type', 'text/html');
-					res.send(prependFileContent + lastCompilationAssets[relativeFilePath].source.source());
+					const page = lastCompilationAssets[relativeFilePath].source.source()?.toString();
+					res.send(page.replace('</head>', `${prependFileContent}</head>`));
 				}
 			} else
 			if (typeof lastCompilationAssets[relativeFilePath] !== 'undefined') {

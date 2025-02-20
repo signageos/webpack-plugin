@@ -14,8 +14,8 @@
   "scripts": {
     "build": "tsc",
     "lint": "tslint --config tslint.json \"{src,tests}/**/*.{ts,tsx}\"",
-    "prebuild": "rm -rf dist/*",
-    "prepare": "npm run prebuild && npm run build",
+    "clean": "rm -rf dist/*",
+    "clean-build": "npm run clean && npm run build",
     "test": "mocha",
     "watch": "tsc --watch",
     "check": "npm run depcheck && npx --userconfig ./.npmrc @signageos/lib check-deps",

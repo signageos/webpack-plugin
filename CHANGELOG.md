@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Fixed issues with npm dependencies tree (not available old packages)
+
 ## [1.0.7] - 2025-02-20
 ### Fixed
 - Insert script tag in applet with live reload properly to prevent browser to parse html in quirks mode

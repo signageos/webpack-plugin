@@ -1,6 +1,7 @@
 {
 	"expectRanges": {
 		"@signageos/sdk": "^",
-		"@signageos/cli": "^"
+		"@signageos/cli": "^",
+		"@signageos/front-display": "^"
 	}
 }

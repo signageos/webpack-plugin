@@ -37,8 +37,8 @@
   },
   "homepage": "https://github.com/signageos/webpack-plugin#readme",
   "dependencies": {
-    "@signageos/cli": "^1.6.0",
-    "@signageos/sdk": "^1.24.0",
+    "@signageos/cli": "^1.7.1",
+    "@signageos/sdk": "^1.26.1",
     "chalk": "3.0.0",
     "command-line-args": "5.2.1",
     "cors": "2.8.5",
@@ -49,12 +49,12 @@
     "serve-static": "1.16.0"
   },
   "peerDependencies": {
-    "@signageos/front-display": ">=11.0.0",
+    "@signageos/front-display": ">=14.0.0",
     "webpack": ">=4.0.0"
   },
   "devDependencies": {
     "@signageos/codestyle": "0.2.2",
-    "@signageos/front-display": "14.2.1",
+    "@signageos/front-display": "^14.13.0",
     "@types/chalk": "2.2.0",
     "@types/command-line-args": "5.2.0",
     "@types/command-line-usage": "5.0.4",

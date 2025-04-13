@@ -56,7 +56,7 @@
     "@signageos/codestyle": "0.2.2",
     "@signageos/front-display": "^14.13.0",
     "@types/chalk": "2.2.0",
-    "@types/command-line-args": "5.2.0",
+    "@types/command-line-args": "5.2.3",
     "@types/command-line-usage": "5.0.4",
     "@types/cors": "2.8.17",
     "@types/debug": "4.1.12",

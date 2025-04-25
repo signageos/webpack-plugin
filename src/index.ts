@@ -175,6 +175,11 @@ interface IEmulator {
 	stop(): void;
 }
 
+// Type guard to check if an object is a webpack AssetEmittedInfo
+function isAssetEmittedInfo(obj: any): obj is webpack.AssetEmittedInfo {
+	return obj && typeof obj === 'object' && 'source' in obj;
+}
+
 type WebpackAssets = {
 	[filePath: string]: {
 		source: Pick<webpack.Asset['source'], 'buffer' | 'source'>;
@@ -299,8 +304,11 @@ async function createEmulator(
 								buffer: () => assetEmittedInfo,
 							},
 						};
-					} else {
-						lastCompilationAssets[filename] = assetEmittedInfo;
+					} else if (isAssetEmittedInfo(assetEmittedInfo)) {
+						// For Webpack 5+, use the type guard to safely access the source property
+						lastCompilationAssets[filename] = {
+							source: assetEmittedInfo.source as Pick<webpack.Asset['source'], 'buffer' | 'source'>,
+						};
 					}
 				} catch (error) {
 					console.error(error);

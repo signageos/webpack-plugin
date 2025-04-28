@@ -1,5 +1,5 @@
 {
-  "specials": ["mocha"],
+  "specials": ["mocha", "tslint", "webpack"],
   "parsers": {
     "**/*.ts": "typescript",
     "**/*.js": "es6"
@@ -11,20 +11,14 @@
     "@signageos/codestyle",
     "mocha",
     "depcheck",
-    "prettier",
     "debug",
     "child-process-promise",
     "download",
     "fs-extra",
     "unzipper",
-    "@eslint/eslintrc",
-    "@eslint/js",
-    "eslint",
-    "eslint-config-prettier",
-    "eslint-plugin-unused-imports",
-    "prettier",
     "should",
-    "typescript-eslint",
-    "run-script-os"
+    "run-script-os",
+    "webpack",
+    "@signageos/front-display"
   ]
 }

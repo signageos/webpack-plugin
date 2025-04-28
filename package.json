@@ -22,7 +22,7 @@
     "test": "mocha",
     "watch": "tsc --watch",
     "check": "npm run depcheck && npx --userconfig ./.npmrc @signageos/lib-ci check-deps",
-    "depcheck": "depcheck --specials=tslint,webpack,mocha --parsers='**/*.ts:typescript,**/*.js:es6' --detectors='requireCallExpression,importDeclaration' --ignore-dirs='dist' --ignores='@types/*,@signageos/codestyle,mocha,depcheck,webpack,@signageos/front-display'"
+    "depcheck": "depcheck --config .depcheckrc.json"
   },
   "repository": {
     "type": "git",
@@ -40,8 +40,8 @@
   },
   "homepage": "https://github.com/signageos/webpack-plugin#readme",
   "dependencies": {
-    "@signageos/cli": "^2.3.0",
-    "@signageos/sdk": "^1.27.3",
+    "@signageos/cli": "^2.3.1",
+    "@signageos/sdk": "^1.27.4",
     "chalk": "4.1.2",
     "command-line-args": "6.0.1",
     "cors": "2.8.5",
@@ -56,7 +56,7 @@
     "webpack": ">=4.0.0"
   },
   "devDependencies": {
-    "@signageos/codestyle": "0.4.0",
+    "@signageos/codestyle": "1.0.0",
     "@signageos/front-display": "^14.18.4",
     "@types/command-line-args": "5.2.3",
     "@types/command-line-usage": "5.0.4",
@@ -74,7 +74,6 @@
     "mocha": "11.1.0",
     "ts-node": "10.9.2",
     "typescript": "5.8.3",
-    "typescript-eslint": "^8.31.0",
     "webpack": "5.99.7"
   }
 }

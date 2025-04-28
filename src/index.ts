@@ -133,7 +133,7 @@ export default class Plugin {
 
     compiler.hooks.watchClose.tap("SignageOSPlugin", async () => {
       if (emulator) {
-        emulator.stop();
+        void emulator.stop();
         emulator = undefined;
       }
       if (server) {
@@ -146,14 +146,14 @@ export default class Plugin {
       "SignageOSPlugin",
       async (filename, assetEmittedInfo) => {
         if (emulator) {
-          emulator.notifyEmittedFile(filename, assetEmittedInfo);
+          void emulator.notifyEmittedFile(filename, assetEmittedInfo);
         }
       },
     );
 
     compiler.hooks.done.tap("SignageOSPlugin", async (stats) => {
       if (emulator) {
-        emulator.notifyDone(stats);
+        void emulator.notifyDone(stats);
       }
       if (dev && appletOptions) {
         const virtualFs = getCompilationFileSystem(
@@ -175,11 +175,11 @@ export default class Plugin {
 
     process.on("exit", () => {
       if (emulator) {
-        emulator.stop();
+        void emulator.stop();
         emulator = undefined;
       }
       if (server) {
-        server.stop();
+        void server.stop();
         server = undefined;
       }
     });

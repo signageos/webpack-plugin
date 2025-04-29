@@ -1,0 +1,24 @@
+{
+  "specials": ["mocha", "tslint", "webpack"],
+  "parsers": {
+    "**/*.ts": "typescript",
+    "**/*.js": "es6"
+  },
+  "detectors": ["importDeclaration", "requireCallExpression"],
+  "ignore-dirs": ["dist"],
+  "ignores": [
+    "@types/*",
+    "@signageos/codestyle",
+    "mocha",
+    "depcheck",
+    "debug",
+    "child-process-promise",
+    "download",
+    "fs-extra",
+    "unzipper",
+    "should",
+    "run-script-os",
+    "webpack",
+    "@signageos/front-display"
+  ]
+}

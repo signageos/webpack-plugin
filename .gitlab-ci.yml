@@ -5,3 +5,4 @@ include:
 
 variables:
   NODE_VERSION: 20
+  SOS_API_URL: https://automated.test.signageos.io

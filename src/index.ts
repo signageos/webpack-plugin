@@ -4,7 +4,7 @@ import * as path from "path";
 import * as http from "http";
 import * as url from "url";
 import * as cors from "cors";
-import * as mime from "mime";
+import mime from "mime";
 import * as fsExtra from "fs-extra";
 import * as nativeFs from "fs";
 import * as serveStatic from "serve-static";
@@ -71,12 +71,12 @@ const DEFAULT_WEBPACK_OPTIONS: IWebpackOptions = {
   appletPort: 8091,
 };
 export default class Plugin {
-  constructor(private options: IWebpackOptions = {}) {
-    this.options = { ...DEFAULT_WEBPACK_OPTIONS, ...this.options };
-  }
+	constructor(private readonly options: IWebpackOptions = {}) {
+		this.options = { ...DEFAULT_WEBPACK_OPTIONS, ...this.options };
+	}
 
   public apply(compiler: webpack.Compiler) {
-    console.log("SOS Plugin started");
+    console.info("SOS Plugin started");
 
     const appletPath = compiler.context;
 
@@ -86,17 +86,13 @@ export default class Plugin {
     let appletOptions: IAppletOptions | undefined;
     let dev: Development | undefined;
 
-    compiler.hooks.watchRun.tapPromise(
-      "SignageOSPlugin",
-      async (_compiler: webpack.Compiler) => {
-        if (!organizationUid) {
-          organizationUid = await getCurrentOrganizationUid();
-        }
-        if (!dev) {
-          dev = createDevelopment({
-            organizationUid,
-          });
-        }
+		compiler.hooks.watchRun.tapPromise('SignageOSPlugin', async (_compiler: webpack.Compiler) => {
+			if (!organizationUid) {
+				organizationUid = await getCurrentOrganizationUid();
+			}
+			dev ??= createDevelopment({
+					organizationUid,
+				});
 
         if (!appletOptions) {
           try {
@@ -104,7 +100,7 @@ export default class Plugin {
               await dev.applet.identification.getAppletUidAndVersion(
                 appletPath,
               );
-          } catch (e) {
+          } catch {
             console.warn(
               chalk.yellow(
                 "Applet is not uploaded yet. It cannot be developed on real device.",
@@ -113,14 +109,12 @@ export default class Plugin {
           }
         }
 
-        if (!emulator) {
-          emulator = await createEmulator(
+        emulator ??= await createEmulator(
             this.options,
             appletOptions,
             organizationUid,
             appletPath,
           );
-        }
         if (!server && appletOptions) {
           server = await dev.applet.serve.serve({
             ...appletOptions,
@@ -133,7 +127,7 @@ export default class Plugin {
 
     compiler.hooks.watchClose.tap("SignageOSPlugin", async () => {
       if (emulator) {
-        void emulator.stop();
+        emulator.stop();
         emulator = undefined;
       }
       if (server) {
@@ -146,14 +140,14 @@ export default class Plugin {
       "SignageOSPlugin",
       async (filename, assetEmittedInfo) => {
         if (emulator) {
-          void emulator.notifyEmittedFile(filename, assetEmittedInfo);
+          emulator.notifyEmittedFile(filename, assetEmittedInfo);
         }
       },
     );
 
     compiler.hooks.done.tap("SignageOSPlugin", async (stats) => {
       if (emulator) {
-        void emulator.notifyDone(stats);
+        emulator.notifyDone(stats);
       }
       if (dev && appletOptions) {
         const virtualFs = getCompilationFileSystem(
@@ -175,7 +169,7 @@ export default class Plugin {
 
     process.on("exit", () => {
       if (emulator) {
-        void emulator.stop();
+        emulator.stop();
         emulator = undefined;
       }
       if (server) {
@@ -252,8 +246,8 @@ async function createEmulator(
     );
     const frontDisplayDistPath = path.join(frontDisplayPath, "dist");
 
-    let lastCompilationAssets: WebpackAssets = {};
-    let envVars: IEnvVars = {
+    const lastCompilationAssets: WebpackAssets = {};
+    const envVars: IEnvVars = {
       uid: appletOptions?.appletUid || "__default_timing__",
       version: appletOptions?.appletVersion || "0.0.0",
       organizationUid,
@@ -293,7 +287,7 @@ async function createEmulator(
     server.listen(defaultPort, () => {
       const emulatorUrl =
         options.publicUrl ?? `http://localhost:${defaultPort}`;
-      console.log(
+      console.info(
         `Emulator is running at ${chalk.blue(chalk.bold(emulatorUrl))}`,
       );
     });
@@ -338,7 +332,7 @@ async function createEmulator(
         assetEmittedInfo: webpack.AssetEmittedInfo | Buffer,
       ) {
         try {
-          console.log("SOS Applet compilation done");
+          console.info("SOS Applet compilation done");
 
           if (assetEmittedInfo instanceof Buffer) {
             // Back compatibility for Webpack 4 and less.
@@ -367,19 +361,16 @@ async function createEmulator(
         envVars.checksum = stats.compilation.hash!;
         debug("process.env", envVars);
 
-        if (typeof stats.compilation.assets["index.html"] === "undefined") {
-          console.warn(
-            `Applet has to have ${chalk.green("index.html")} in output files.`,
-          );
-          return;
-        }
-      },
-      stop() {
-        server.close();
-      },
-    };
-  } catch (error) {
-    console.error(error);
-    process.exit(1);
-  }
+				if (typeof stats.compilation.assets['index.html'] === 'undefined') {
+					console.warn(`Applet has to have ${chalk.green('index.html')} in output files.`);
+				}
+			},
+			stop() {
+				server.close();
+			},
+		};
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
+	}
 }

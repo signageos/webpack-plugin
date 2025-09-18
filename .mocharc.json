@@ -1,4 +1,4 @@
 {
-  "require": ["dotenv/config", "ts-node/register"],
-  "spec": "test/**/*.spec.ts"
+	"require": ["dotenv/config", "ts-node/register"],
+	"spec": "test/**/*.spec.ts"
 }

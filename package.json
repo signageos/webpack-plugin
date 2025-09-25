@@ -74,7 +74,7 @@
 		"@signageos/front-display": "^14.22.0",
 		"@types/command-line-args": "5.2.3",
 		"@types/command-line-usage": "5.0.4",
-		"@types/cors": "2.8.17",
+		"@types/cors": "2.8.19",
 		"@types/debug": "4.1.12",
 		"@types/express": "4.17.21",
 		"@types/fs-extra": "11.0.4",

@@ -8,6 +8,7 @@
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
+		"esModuleInterop": true,
 		"pretty": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,

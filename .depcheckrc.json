@@ -19,6 +19,7 @@
 		"should",
 		"run-script-os",
 		"webpack",
-		"@signageos/front-display"
+		"@signageos/front-display",
+		"typescript-eslint"
 	]
 }

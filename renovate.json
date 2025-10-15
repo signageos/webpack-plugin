@@ -1,5 +1,11 @@
-
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["gitlab>signageos/infra/renovate-config"]
+	"extends": ["gitlab>signageos/infra/renovate-config"],
+	"packageRules": [
+		{
+			"matchPackageNames": ["mime"],
+			"allowedVersions": "<4.0.0",
+			"description": "Keep mime on 3.x for CommonJS compatibility. Version 4.x is ESM-only (breaking)"
+		}
+	]
 }

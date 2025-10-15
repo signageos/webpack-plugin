@@ -1,15 +1,15 @@
 import * as webpack from 'webpack';
-import * as express from 'express';
+import express from 'express';
 import * as path from 'path';
 import * as http from 'http';
 import * as url from 'url';
-import * as cors from 'cors';
+import cors from 'cors';
 import mime from 'mime';
 import * as fsExtra from 'fs-extra';
 import * as nativeFs from 'fs';
-import * as serveStatic from 'serve-static';
+import serveStatic from 'serve-static';
 import * as chalk from 'chalk';
-import * as cliArgs from 'command-line-args';
+import cliArgs from 'command-line-args';
 import Debug from 'debug';
 import {
 	getOrganizationUidOrDefaultOrSelect,

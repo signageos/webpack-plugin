@@ -81,7 +81,7 @@
 		"@types/ini": "4.1.1",
 		"@types/mime": "3.0.4",
 		"@types/mocha": "10.0.10",
-		"@types/node": "24.7.2",
+		"@types/node": "24.10.0",
 		"@types/node-fetch": "2.6.13",
 		"@types/serve-static": "1.15.9",
 		"depcheck": "1.4.7",

@@ -83,7 +83,7 @@
 		"@types/mocha": "10.0.10",
 		"@types/node": "24.7.2",
 		"@types/node-fetch": "2.6.13",
-		"@types/serve-static": "1.15.9",
+		"@types/serve-static": "1.15.10",
 		"depcheck": "1.4.7",
 		"mocha": "11.7.4",
 		"ts-node": "10.9.2",

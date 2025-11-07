@@ -85,7 +85,7 @@
 		"@types/node-fetch": "2.6.13",
 		"@types/serve-static": "1.15.10",
 		"depcheck": "1.4.7",
-		"mocha": "11.7.4",
+		"mocha": "11.7.5",
 		"ts-node": "10.9.2",
 		"typescript": "5.9.3",
 		"typescript-eslint": "8.46.3",

@@ -27,6 +27,18 @@ exports = module.exports = {
 };
 ```
 
+## Local Configuration
+You can create a `sos.config.local.json` file in your applet directory to provide configuration values during local development. This file is automatically loaded when the webpack plugin runs and passed to your applet as configuration:
+
+```json
+{
+  "myConfigKey": "myConfigValue",
+  "anotherSetting": true
+}
+```
+
+This is useful for testing your applet with different configuration values without deploying to a device.
+
 ## Contribution
 Clone the repository and install dev dependencies
 ```sh

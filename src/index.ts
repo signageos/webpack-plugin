@@ -180,6 +180,7 @@ type WebpackAssets = {
 };
 
 const APPLET_DIRECTORY_PATH = '/applet';
+const SOS_CONFIG_LOCAL_FILENAME = 'sos.config.local.json';
 
 type IEnvVars = {
 	frontAppletVersion: string;
@@ -234,6 +235,7 @@ async function createEmulator(
 		app.use(cors());
 
 		app.get('/', (_req: express.Request, res: express.Response) => {
+			const localConfig = loadSosLocalConfig(appletPath);
 			const page = fsExtra.readFileSync(path.join(frontDisplayDistPath, 'index.html')).toString();
 
 			const script = `
@@ -242,6 +244,7 @@ async function createEmulator(
 	window.__SOS_BUNDLED_APPLET.binaryFile = location.origin + ${JSON.stringify(envVars.binaryFilePath)};
 	window.__SOS_BUNDLED_APPLET.uid = ${JSON.stringify(envVars.uid)};
 	window.__SOS_BUNDLED_APPLET.version = ${JSON.stringify(envVars.version)};
+	window.__SOS_BUNDLED_APPLET.config = ${JSON.stringify(localConfig)};
 	window.__SOS_BUNDLED_APPLET.checksum = ${JSON.stringify(envVars.checksum)};
 	window.__SOS_BUNDLED_APPLET.frontAppletVersion = ${JSON.stringify(envVars.frontAppletVersion)};
 	window.__SOS_BUNDLED_APPLET.frontAppletBinaryFile = ${JSON.stringify(envVars.frontAppletBinaryFile)};
@@ -322,5 +325,31 @@ async function createEmulator(
 	} catch (error) {
 		console.error(error);
 		process.exit(1);
+	}
+}
+
+function loadSosLocalConfig(appletPath: string): Record<string, unknown> {
+	const sosConfigLocalPath = path.join(appletPath, SOS_CONFIG_LOCAL_FILENAME);
+	if (fsExtra.existsSync(sosConfigLocalPath)) {
+		try {
+			const configContent = fsExtra.readFileSync(sosConfigLocalPath, 'utf8');
+			console.info(`Loaded local config from ${SOS_CONFIG_LOCAL_FILENAME}`);
+			return JSON.parse(configContent);
+		} catch (error) {
+			console.warn(`Failed to load ${SOS_CONFIG_LOCAL_FILENAME}: ${getErrorMessageFromUnknownError(error)}`);
+		}
+	}
+	return {};
+}
+
+function getErrorMessageFromUnknownError(error: unknown) {
+	if (error) {
+		if (typeof error === 'object' && 'message' in error) {
+			return error.message;
+		} else {
+			return `${error}`;
+		}
+	} else {
+		return null;
 	}
 }

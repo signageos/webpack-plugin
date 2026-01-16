@@ -8,7 +8,7 @@ import mime from 'mime';
 import * as fsExtra from 'fs-extra';
 import * as nativeFs from 'fs';
 import serveStatic from 'serve-static';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import cliArgs from 'command-line-args';
 import Debug from 'debug';
 import {

@@ -16,6 +16,7 @@ import {
 	NO_DEFAULT_ORGANIZATION_OPTION,
 	ORGANIZATION_UID_OPTION,
 } from '@signageos/cli/dist/Organization/organizationFacade';
+import { loadConfig } from '@signageos/cli/dist/RunControl/runControlHelper';
 import { createDevelopment } from '@signageos/sdk';
 import { CommandLineOptions } from '@signageos/cli/dist/Command/commandDefinition';
 import { AppletServer } from '@signageos/sdk/dist/Development/Applet/Serve/AppletServer';
@@ -90,9 +91,14 @@ export default class Plugin {
 			if (!organizationUid) {
 				organizationUid = await getCurrentOrganizationUid();
 			}
-			dev ??= createDevelopment({
-				organizationUid,
-			});
+			if (!dev) {
+				const config = await loadConfig();
+				dev = createDevelopment({
+					organizationUid,
+					// undefined for legacy .sosrc files → SDK falls back to identification/apiSecurityToken
+					accessToken: config.accessToken,
+				});
+			}
 
 			if (!appletOptions) {
 				try {

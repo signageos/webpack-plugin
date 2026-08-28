@@ -41,9 +41,12 @@
 		"url": "https://github.com/signageos/webpack-plugin/issues"
 	},
 	"homepage": "https://github.com/signageos/webpack-plugin#readme",
+	"engines": {
+		"node": ">=20"
+	},
 	"dependencies": {
-		"@signageos/cli": "^2.7.0",
-		"@signageos/sdk": "^2.0.3",
+		"@signageos/cli": "^4.3.0",
+		"@signageos/sdk": "^2.11.0",
 		"chalk": "4.1.2",
 		"command-line-args": "6.0.1",
 		"cors": "2.8.5",

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Authenticate from Auth0 tokens created by `sos login` (CLI >= 4.0.0). Previously the bundled CLI v2 could not read the new ~/.sosrc format and `webpack serve` failed with "Authentication error. Try to login using sos login"
+
+### Changed
+- **BREAKING**: requires Node.js >= 20 (inherited from `@signageos/cli` v4)
+
 ## [1.1.1] - 2026-01-16
 ### Fixed
 - Import of `chalk` dependency fixed (default instead of star)

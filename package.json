@@ -54,7 +54,7 @@
 		"express": "4.21.2",
 		"fs-extra": "11.3.2",
 		"mime": "3.0.0",
-		"serve-static": "2.2.0"
+		"serve-static": "2.2.1"
 	},
 	"overrides": {
 		"underscore": "^1.13.6",
